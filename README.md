@@ -41,3 +41,16 @@ My GPIO Configuration, see [GPIO Pin out](https://www.raspberrypi-spy.co.uk/2012
 -   Test with actual sensor
 -   Build Web Server
 
+## Setup
+There are two components to the software setup, Python libaries and some other ones (A StackOverflow post said to install them to fix an error I had):
+```bash
+sudo apt install libgpiod2
+sudo apt install libcblas-dev
+sudo apt install libhdf5-dev
+sudo apt install libhdf5-serial-dev
+sudo apt install libatlas-base-dev
+sudo apt install libjasper-dev 
+sudo apt install libqtgui4 
+sudo apt install libqt4-test
+sudo apt install libopenjp2-7
+```

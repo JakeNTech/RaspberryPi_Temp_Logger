@@ -3,3 +3,5 @@ pandas
 matplotlib
 numpy
 adafruit_dht
+adafruit-circuitpython-dht
+opencv-python
