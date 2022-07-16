@@ -31,7 +31,11 @@ optional arguments:
   -w, --webserver       Run the Web server for a graphical output
 ```
 ## Notes
-This is still very much under development and has yet to be tested with an actual sensor!
+This is still very much under development and has yet to be tested with an actual sensor!\
+My GPIO Configuration, see [GPIO Pin out](https://www.raspberrypi-spy.co.uk/2012/06/simple-guide-to-the-rpi-gpio-header-and-pins/):
+
+-   Sensor 1: GPIO Pin 11, D17, Green Wire
+-   Sensor 2: GPIO Pin 13, D27, Yellow Wire
 
 ## To Do
 -   Test with actual sensor

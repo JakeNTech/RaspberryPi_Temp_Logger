@@ -1,11 +1,17 @@
 {
-    "sensor":{
-        "read_timeout":1,
+    "logging":{
+        "read_timeout":5,
         "metric_units":true,
-        "max_readings":60
-    },
-    "file_paths":{
         "CSV_output_path":"./Output.csv"
+    },
+    "sensor_1":{
+        "wire_colour":"Green",
+        "GPIO_pin":11,
+        "D_pin":17
+    },
+    "sensor_2":{
+        "wire_colour":"Yellow",
+        "GPIO_pin":13,
+        "D_pin":27
     }
-
 }
