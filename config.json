@@ -1,0 +1,11 @@
+{
+    "sensor":{
+        "read_timeout":1,
+        "metric_units":true,
+        "max_readings":60
+    },
+    "file_paths":{
+        "CSV_output_path":"./Output.csv"
+    }
+
+}
