@@ -9,6 +9,7 @@ import adafruit_dht
 import board
 import numpy as np
 import os
+from datetime import datetime
 
 # https://gist.github.com/elizabethn119/25be959d124f4b4c86f7160cf916f4d4
 
@@ -186,7 +187,7 @@ if __name__ == "__main__":
         os.remove("log.txt")
     
     if os.path.exists("Output.csv"):
-        os.rename("./Output.csv",f"../Sample_Data/{np.datetime64('now')}_Old.csv")
+        os.rename("./Output.csv",f"../Sample_Data/{datetime.now().strftime('%Y-%m-%dT%H%M:%S')}_Old.csv")
 
     create_csv(config["logging"]["CSV_output_path"])
 
