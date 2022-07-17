@@ -43,16 +43,10 @@ def log_to_csv(output_file,this_line):
 def read_log_temperature(timeout,metric_units):    
     dhtSensor1 = adafruit_dht.DHT22(board.D27)
     # dhtSensor2 = adafruit_dht.DHT22(board.D27)
-
-    global S1_humidity
-    global S1_temperature
-    global S2_humidity
-    global S2_temperature
-    global temperature_avg
-    global humidity_avg
+    last_error = False
+    gpio_display.lcd_clear()
 
     while True:
-        
         #current_time = datetime.now().strftime("%Y-%m-%d %H%M:%S")
         current_time = np.datetime64('now')
         # Sensor 1
@@ -101,9 +95,19 @@ def read_log_temperature(timeout,metric_units):
         # else:
         #     temperature_avg = round((S1_temperature+S2_temperature)/2,2)
         #     humidity_avg = round((S1_humidity+S2_humidity)/2,2)
+        if last_error == True:
+            gpio_display.lcd_clear()
         
-        gpio_display.lcd_display_string("Temp:"+str(S1_temperature)+"C",line=1)
-        gpio_display.lcd_display_string("Humid:"+str(S1_humidity)+"%",line=2)
+        if S1_temperature == None and S1_humidity == None:
+            gpio_display.lcd_clear()
+            gpio_display.lcd_display_string("Run Time Error",line=1)
+            gpio_display.lcd_display_string(str(current_time),line=2)
+            last_error = True
+        else:
+            gpio_display.lcd_display_string("Temp: "+str(S1_temperature)+"C",line=1)
+            gpio_display.lcd_display_string("Humi: "+str(S1_humidity)+"%",line=2)
+            last_error = False
+
         #"Date/Time,Temperature(S1),Temperature(S2),Humidity(S1)(%),Humidity(S2)(%),Average_Temp,Average_Humidity
         log_to_csv(config["logging"]["CSV_output_path"],[current_time,S1_temperature,S1_humidity])
 
@@ -111,21 +115,19 @@ def read_log_temperature(timeout,metric_units):
     
 if __name__ == "__main__":
     print("Raspberry Pi Temperature & Humidity Logger!")
-    arguments = get_args()
-
-    S1_humidity = 0
-    S1_temperature = 0
-    S2_humidity = 0
-    S2_temperature = 0
-    temperature_avg = 0
-    humidity_avg = 0
-
-    global config
-    config = load_config(arguments.config_file)
     
     global gpio_display
     gpio_display = I2C_LCD_driver.lcd()
 
+    gpio_display.lcd_clear()
+    gpio_display.lcd_display_string("RaspPi Temp",line=1)
+    gpio_display.lcd_display_string("Logger! Running!",line=2)
+
+    arguments = get_args()
+
+    global config
+    config = load_config(arguments.config_file)
+    
     if os.path.exists("log.txt"):
         os.remove("log.txt")
     
