@@ -3,14 +3,12 @@ import argparse
 import json
 import csv
 import threading
-from datetime import datetime
 import time
 from flask import Flask, jsonify, request
 import adafruit_dht
 import board
-
-# My Libraries
-from data_utilites import graph_maker
+import numpy as np
+import os
 
 # https://gist.github.com/elizabethn119/25be959d124f4b4c86f7160cf916f4d4
 
@@ -34,7 +32,7 @@ def error_logging(error_msg):
 
 def create_csv(output_file):
     csv_file = open(output_file,"w")
-    csv_file.write("Date/Time,Temperature(S1),Temperature(S2),Humidity(S1)(%),Humidity(S2)(%),Average_Temp,Average_Humidity\n")
+    csv_file.write("Date/Time,Temperature("+config["sensor_1"]["name"]+"),Temperature("+config["sensor_2"]["name"]+"),Humidity("+config["sensor_1"]["name"]+")(%),Humidity("+config["sensor_2"]["name"]+")(%),Average_Temp,Average_Humidity\n")
     csv_file.close()
 
 def log_to_csv(output_file,this_line):
@@ -56,7 +54,8 @@ def read_log_temperature(timeout,metric_units):
     reading_no = 0
     while True:
         
-        current_time = datetime.now().strftime("%d/%m/%YT%H:%M:%S")
+        #current_time = datetime.now().strftime("%Y-%m-%d %H%M:%S")
+        current_time = np.datetime64('now')
         # Sensor 1
         try:
             S1_humidity = dhtSensor1.humidity
@@ -152,10 +151,8 @@ def api_call(action):
         return(json_responce)
     elif action == "historic_temp":
         return(jsonify(read_csv(config["logging"]["CSV_output_path"])))
-    elif action == "all_time_graph":
-        graph_maker.all_time_temp(config["logging"]["CSV_output_path"])
-        img_path = "yes"
-        return(jsonify(img_path))
+    elif action == "download_csv":
+        return(app.send_static_file(config["logging"]["CSV_output_path"]))
 
 # Python Functions
 def web_runner(csv_output_file):
@@ -185,6 +182,12 @@ if __name__ == "__main__":
     global config
     config = load_config(arguments.config_file)
     
+    if os.path.exists("log.txt"):
+        os.remove("log.txt")
+    
+    if os.path.exists("Output.csv"):
+        os.rename("./Output.csv",f"../Sample_Data/{np.datetime64('now')}_Old.csv")
+
     create_csv(config["logging"]["CSV_output_path"])
 
     # Pass Temperature logging out to a new thread, can keep webserver running at same time! #multitasking
