@@ -6,12 +6,6 @@
     },
     "sensor_1":{
         "name":"S1",
-        "wire_colour":"Green",
-        "GPIO_pin":11,
-        "D_pin":17
-    },
-    "sensor_2":{
-        "name":"S2",
         "wire_colour":"Yellow",
         "GPIO_pin":13,
         "D_pin":27
