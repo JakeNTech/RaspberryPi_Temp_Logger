@@ -5,7 +5,7 @@
         "CSV_output_path":"./Output.csv"
     },
     "sensor_1":{
-        "name":"S1",
+        "name":"Outdoor",
         "wire_colour":"Yellow",
         "GPIO_pin":13,
         "D_pin":27

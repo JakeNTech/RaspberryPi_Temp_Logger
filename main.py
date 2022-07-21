@@ -1,5 +1,6 @@
 # Python Libraries
 import argparse
+import datetime
 import json
 import csv
 import threading
@@ -8,8 +9,9 @@ import adafruit_dht
 import board
 import numpy as np
 import os
-from datetime import datetime
 import I2C_LCD_driver
+from astral import LocationInfo
+from astral.sun import sun
 
 # https://gist.github.com/elizabethn119/25be959d124f4b4c86f7160cf916f4d4
 
@@ -25,11 +27,6 @@ def load_config(config_file):
         config_file.close()
     return d
 
-def error_logging(error_msg):
-    log_for_logging = open("log.txt","a")
-    log_for_logging.write(error_msg+"\n")
-    log_for_logging.close()
-
 def create_csv(output_file):
     csv_file = open(output_file,"w")
     csv_file.write("Date/Time,Temperature("+config["sensor_1"]["name"]+"),Humidity("+config["sensor_1"]["name"]+")(%)\n")
@@ -43,19 +40,19 @@ def log_to_csv(output_file,this_line):
 def read_log_temperature(timeout,metric_units):    
     dhtSensor1 = adafruit_dht.DHT22(board.D27)
     # dhtSensor2 = adafruit_dht.DHT22(board.D27)
-    last_error = False
-    gpio_display.lcd_clear()
 
     while True:
         #current_time = datetime.now().strftime("%Y-%m-%d %H%M:%S")
         current_time = np.datetime64('now')
+
+        global S1_humidity
+        global S1_temperature
+
         # Sensor 1
         try:
             S1_humidity = dhtSensor1.humidity
             S1_temperature = dhtSensor1.temperature
         except RuntimeError:
-            error = f"{current_time},Run Time Error, Sensor 1"
-            error_logging(error)
             S1_humidity = None
             S1_temperature = None
         
@@ -95,34 +92,61 @@ def read_log_temperature(timeout,metric_units):
         # else:
         #     temperature_avg = round((S1_temperature+S2_temperature)/2,2)
         #     humidity_avg = round((S1_humidity+S2_humidity)/2,2)
-        if last_error == True:
-            gpio_display.lcd_clear()
-        
-        if S1_temperature == None and S1_humidity == None:
-            gpio_display.lcd_clear()
-            gpio_display.lcd_display_string("Run Time Error",line=1)
-            gpio_display.lcd_display_string(str(current_time),line=2)
-            last_error = True
-        else:
-            gpio_display.lcd_display_string("Temp: "+str(S1_temperature)+"C",line=1)
-            gpio_display.lcd_display_string("Humi: "+str(S1_humidity)+"%",line=2)
-            last_error = False
 
         #"Date/Time,Temperature(S1),Temperature(S2),Humidity(S1)(%),Humidity(S2)(%),Average_Temp,Average_Humidity
         log_to_csv(config["logging"]["CSV_output_path"],[current_time,S1_temperature,S1_humidity])
 
         time.sleep(timeout)
-    
+
+def lcd_display():
+    max_temp = 0
+    max_humid = 0
+    day = "not_set"
+
+    global gpio_display
+    gpio_display = I2C_LCD_driver.lcd()
+    gpio_display.lcd_clear()
+    while True:
+        # if the day varaible no longer is the current day
+        if day != time.strftime("%a"):
+            # clear max values
+            max_temp = 0
+            max_humid = 0
+            # collect dawn/dusk times
+            city = LocationInfo("London", "England", "Europe/London", 51.5, -0.116)
+            s = sun(city.observer)
+            dawn = str(s["dawn"])
+            dawn = ":".join(dawn.split(" ")[1].split(".")[0].split(":")[0:2])
+            dusk = str(s["dusk"])
+            dusk = ":".join(dusk.split(" ")[1].split(".")[0].split(":")[0:2])
+            # make the day variable = today
+            day = time.strftime("%a")
+
+        gpio_display.lcd_display_string(time.strftime("%H:%M %a  %d/%m"),line=1)
+        if S1_temperature == None or S1_humidity == None:
+            gpio_display.lcd_display_string("Runtime Error :( ",line=2)
+        else:            
+            gpio_display.lcd_display_string(str(S1_temperature)+"C      "+str(S1_humidity)+"%",line=2)
+        time.sleep(5)
+
+        if isinstance(S1_temperature, float) and isinstance(S1_humidity, float):
+            if S1_temperature > max_temp:
+                max_temp = S1_temperature
+            if S1_humidity > max_humid and isinstance(S1_humidity, float):
+                max_humid = S1_humidity
+
+        gpio_display.lcd_display_string("Max Temp:  "+str(max_temp)+"C",line=2)
+        time.sleep(5)
+        gpio_display.lcd_display_string("Max Humid: "+str(max_humid)+"%",line=2)
+        time.sleep(5)
+        gpio_display.lcd_display_string("Dawn:      "+str(dawn),line=2)
+        time.sleep(2)
+        gpio_display.lcd_display_string("Dusk:      "+str(dusk),line=2)
+        time.sleep(2)
+
 if __name__ == "__main__":
     print("Raspberry Pi Temperature & Humidity Logger!")
     
-    global gpio_display
-    gpio_display = I2C_LCD_driver.lcd()
-
-    gpio_display.lcd_clear()
-    gpio_display.lcd_display_string("RaspPi Temp",line=1)
-    gpio_display.lcd_display_string("Logger! Running!",line=2)
-
     arguments = get_args()
 
     global config
@@ -131,11 +155,16 @@ if __name__ == "__main__":
     if os.path.exists("log.txt"):
         os.remove("log.txt")
     
-    if os.path.exists("Output.csv"):
-        os.rename("./Output.csv",f"../Sample_Data/{datetime.now().strftime('%Y-%m-%dT%H%M:%S')}_Old.csv")
+    # if os.path.exists("Output.csv"):
+    #     os.rename("./Output.csv",f"../Sample_Data/{datetime.now().strftime('%Y-%m-%dT%H%M:%S')}_Old.csv")
 
-    create_csv(config["logging"]["CSV_output_path"])
+    # create_csv(config["logging"]["CSV_output_path"])
+
+    S1_temperature = 0
+    S1_humidity = 0
 
     # Pass Temperature logging out to a new thread, can keep webserver running at same time! #multitasking
-    th = threading.Thread(target=read_log_temperature, args=(config["logging"]["read_timeout"],config["logging"]["metric_units"]))
-    th.start()
+    temp_log_thread = threading.Thread(target=read_log_temperature, args=(config["logging"]["read_timeout"],config["logging"]["metric_units"]))
+    display_thread = threading.Thread(target=lcd_display)
+    temp_log_thread.start()
+    display_thread.start()
