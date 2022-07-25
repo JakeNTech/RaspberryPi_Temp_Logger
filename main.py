@@ -90,14 +90,14 @@ def lcd_display():
     gpio_display.lcd_clear()
 
     while True:
-        gpio_display.lcd_display_string(f"{time.strftime('%H:%M %a %d/%m')}",line=1)
+        gpio_display.lcd_display_string(f"{time.strftime('%H:%M  %a %d/%m')}",line=1)
 
         if outdoor_temperature == None or outdoor_humidity == None or indoor_temperature == None or indoor_humidity == None:
             gpio_display.lcd_display_string("Runtime Error :( ",line=2)
         else:            
-            gpio_display.lcd_display_string("In: "+str(indoor_temperature)+"C "+str(indoor_humidity)+"%",line=2)
+            gpio_display.lcd_display_string("In:  "+str(indoor_temperature)+"C "+str(indoor_humidity)+"%",line=2)
             time.sleep(5)
-            gpio_display.lcd_display_string("Out:"+str(outdoor_temperature)+"C "+str(outdoor_humidity)+"%",line=2)
+            gpio_display.lcd_display_string("Out: "+str(outdoor_temperature)+"C "+str(outdoor_humidity)+"%",line=2)
         
         time.sleep(5)
 
