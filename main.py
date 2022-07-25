@@ -1,31 +1,18 @@
 # Python Libraries
-import argparse
-import datetime
-import json
 import csv
 import threading
 import time
 import adafruit_dht
 import board
 import numpy as np
-import os
+# import os
 import I2C_LCD_driver
+from flask import Flask
 from astral import LocationInfo
 from astral.sun import sun
+from graphs import snazzy_graphs
 
 # https://gist.github.com/elizabethn119/25be959d124f4b4c86f7160cf916f4d4
-
-# Command line arguments
-def get_args():
-    parser = argparse.ArgumentParser(description='A Python Temperature sensor logger and web server')
-    parser.add_argument("-c", "--config", dest="config_file", help="Location of the config file. Default: ./config.json", metavar="<path>",default="./config.json")
-    return parser.parse_args()
-
-def load_config(config_file):
-    with open("./config.json") as config_file:
-        d = json.load(config_file)
-        config_file.close()
-    return d
 
 def create_csv(output_file):
     csv_file = open(output_file,"w")
@@ -37,119 +24,165 @@ def log_to_csv(output_file,this_line):
             writer = csv.writer(csv_file, delimiter=',')
             writer.writerow(this_line)
 
-def read_log_temperature(timeout,metric_units):    
-    dhtSensor1 = adafruit_dht.DHT22(board.D23)
-    dhtSensor2 = adafruit_dht.DHT22(board.D24)
+def read_log_temperature():
+    day = "not_set"
+    outdoor_dhtSensor = adafruit_dht.DHT22(board.D23)
+    indoor_dhtSensor2 = adafruit_dht.DHT22(board.D24)
 
     while True:
         #current_time = datetime.now().strftime("%Y-%m-%d %H%M:%S")
         current_time = np.datetime64('now')
 
-        global S1_humidity
-        global S1_temperature
+        global outdoor_humidity
+        global outdoor_temperature
+        global indoor_humidity
+        global indoor_temperature
+        global outdoor_max_temp
+        global outdoor_max_humid
+        global indoor_max_temp
+        global indoor_max_humid
 
-        # Sensor 1
+        # Read from sensor
         try:
-            S1_humidity = dhtSensor1.humidity
-            S1_temperature = dhtSensor1.temperature
+            outdoor_humidity = outdoor_dhtSensor.humidity
+            outdoor_temperature = outdoor_dhtSensor.temperature
         except RuntimeError:
-            S1_humidity = None
-            S1_temperature = None
+            outdoor_humidity = None
+            outdoor_temperature = None
         
-        # Sensor 2
         try:
-            S2_humidity = dhtSensor2.humidity
-            S2_temperature = dhtSensor2.temperature
+            indoor_humidity = indoor_dhtSensor2.humidity
+            indoor_temperature = indoor_dhtSensor2.temperature
         except RuntimeError:
-            S2_humidity = None
-            S2_temperature = None
+            indoor_humidity = None
+            indoor_temperature = None
 
-        # TESTING NUMBERS
-        # temperature = round(random.uniform(-40.0,80.0),1)
-        # humidity = round(random.uniform(0.0,100.0),1)
-
-
-        #"Date/Time,Temperature(S1),Temperature(S2),Humidity(S1)(%),Humidity(S2)(%),Average_Temp,Average_Humidity
-        log_to_csv("./Output.csv",[current_time,S1_temperature,S1_humidity,S2_temperature,S2_humidity])
-
-        time.sleep(timeout)
-
-def lcd_display():
-    max_temp = 0
-    max_humid = 0
-    day = "not_set"
-
-    global gpio_display
-    gpio_display = I2C_LCD_driver.lcd()
-    gpio_display.lcd_clear()
-    while True:
-        # if the day varaible no longer is the current day
+        # if the day variable no longer is the current day
         if day != time.strftime("%a"):
             # clear max values
-            S1_max_temp = 0
-            S1_max_humid = 0
-            S2_max_temp = 0
-            S2_max_humid = 0
-            # collect dawn/dusk times
-            city = LocationInfo("London", "England", "Europe/London", 51.5, -0.116)
-            s = sun(city.observer)
-            dawn = str(s["dawn"])
-            dawn = ":".join(dawn.split(" ")[1].split(".")[0].split(":")[0:2])
-            dusk = str(s["dusk"])
-            dusk = ":".join(dusk.split(" ")[1].split(".")[0].split(":")[0:2])
+            outdoor_max_temp = 0
+            outdoor_max_humid = 0
+            indoor_max_temp = 0
+            indoor_max_humid = 0
             # make the day variable = today
             day = time.strftime("%a")
+        
+        # Compare new values to stored Max values for both sensors
+        if isinstance(outdoor_temperature, float) and isinstance(outdoor_humidity, float):
+            if outdoor_temperature > outdoor_max_temp:
+                outdoor_max_temp = outdoor_temperature
+            if outdoor_humidity > outdoor_max_humid and isinstance(outdoor_humidity, float):
+                outdoor_max_humid = outdoor_humidity
+        if isinstance(indoor_temperature, float) and isinstance(indoor_humidity, float):
+            if indoor_temperature > indoor_max_temp:
+                indoor_max_temp = indoor_temperature
+            if indoor_humidity > indoor_max_humid and isinstance(outdoor_humidity, float):
+                indoor_max_humid = indoor_humidity
 
-        s = f"{time.strftime('%H:%M')}     Indoor"
-        s2 = f"{time.strftime('%H:%M')}    Outdoor"
-        # Display Indoor Infomation
-        gpio_display.lcd_display_string(f"{time.strftime('%H:%M')}     Indoor",line=1)
+        #"Date/Time,Temperature(outdoor),Temperature(indoor),Humidity(outdoor)(%),Humidity(indoor)(%),Average_Temp,Average_Humidity
+        log_to_csv("./Output.csv",[current_time,outdoor_temperature,outdoor_humidity,indoor_temperature,indoor_humidity])
 
-        if S1_temperature == None or S1_humidity == None:
-            gpio_display.lcd_display_string("Runtime Error :( ",line=2)
-        else:            
-            gpio_display.lcd_display_string(str(S1_temperature)+"C      "+str(S1_humidity)+"%",line=2)
         time.sleep(5)
 
-        if isinstance(S1_temperature, float) and isinstance(S1_humidity, float):
-            if S1_temperature > S1_max_temp:
-                S1_max_temp = S1_temperature
-            if S1_humidity > S1_max_humid and isinstance(S1_humidity, float):
-                S1_max_humid = S1_humidity
-        if config["lcd_display"]["max_values"] == True:
-            gpio_display.lcd_display_string("Max Temp:  "+str(S1_max_temp)+"C",line=2)
-            time.sleep(5)
-            gpio_display.lcd_display_string("Max Humid: "+str(S1_max_humid)+"%",line=2)
-            time.sleep(5)
-        
+def lcd_display():
+    # LCD Display Object
+    gpio_display = I2C_LCD_driver.lcd()
+    gpio_display.lcd_clear()
 
-        if config["lcd_display"]["dawn_dusk"] == True:
-            gpio_display.lcd_display_string("Dawn:      "+str(dawn),line=2)
-            time.sleep(2)
-            gpio_display.lcd_display_string("Dusk:      "+str(dusk),line=2)
-            time.sleep(2)
+    while True:
+        gpio_display.lcd_display_string(f"{time.strftime('%H:%M %a %d/%m')}",line=1)
+
+        if outdoor_temperature == None or outdoor_humidity == None or indoor_temperature == None or indoor_humidity == None:
+            gpio_display.lcd_display_string("Runtime Error :( ",line=2)
+        else:            
+            gpio_display.lcd_display_string("In: "+str(indoor_temperature)+"C "+str(indoor_humidity)+"%",line=2)
+            time.sleep(5)
+            gpio_display.lcd_display_string("Out:"+str(outdoor_temperature)+"C "+str(outdoor_humidity)+"%",line=2)
+        
+        time.sleep(5)
+
+# Web Interface for better statistics
+app = Flask(__name__)
+
+#Send Index.html
+@app.route('/')
+def load_index():
+    return app.send_static_file('index.html')
+
+# Send Files to make index.html look nice and fancy
+@app.route('/assets/<file>')
+def send_asset(file):
+    asset_path = "assets/"+file
+    return app.send_static_file(asset_path)
+# Send Graphs
+@app.route('/assets/temp_storage/<file>')
+def send_img(file):
+    img_path = "assets/temp_storage/"+file
+    return app.send_static_file(img_path)
+
+# API actions
+@app.route('/api/<action>',methods=['GET'])
+def api_call(action):
+    if action == "current_temp":
+        json_response = {
+            "indoor":{
+                "temp":indoor_temperature,
+                "humidity":indoor_humidity,
+                "max_temp":indoor_max_temp,
+                "max_humidity":indoor_max_humid
+            },
+            "outdoor":{
+                "temp":outdoor_temperature,
+                "humidity":outdoor_humidity,
+                "max_temp":outdoor_max_temp,
+                "max_humidity":outdoor_max_humid
+            }
+        }
+
+    elif action == "dawn_dusk":
+        #collect dawn/dusk times
+        city = LocationInfo("London", "England", "Europe/London", 51.5, -0.116)
+        s = sun(city.observer)
+        dawn = str(s["dawn"])
+        dawn = ":".join(dawn.split(" ")[1].split(".")[0].split(":")[0:2])
+        dusk = str(s["dusk"])
+        dusk = ":".join(dusk.split(" ")[1].split(".")[0].split(":")[0:2])
+        json_response ={
+            "dawn":dawn,
+            "dusk":dusk
+        }
+    
+    elif action == "temp_graph":
+        snazzy_graphs.temp_humid_line_graph()
+        json_response = {
+            "temperature_graph":"/assets/temp_storage/temperature_LG.png",
+            "humidity_graph":"/assets/temp_storage/humidity_LG.png",
+        }
+
+    return json_response
 
 if __name__ == "__main__":
     print("Raspberry Pi Temperature & Humidity Logger!")
     
-    arguments = get_args()
-
-    global config
-    config = load_config(arguments.config_file)
-    
-    if os.path.exists("log.txt"):
-        os.remove("log.txt")
-    
     # if os.path.exists("Output.csv"):
     #     os.rename("./Output.csv",f"../Sample_Data/{datetime.now().strftime('%Y-%m-%dT%H%M:%S')}_Old.csv")
 
-    create_csv(config["logging"]["CSV_output_path"])
+    create_csv("./Output.csv")
 
-    S1_temperature = 0
-    S1_humidity = 0
+    outdoor_temperature = 0
+    outdoor_humidity = 0
+    outdoor_temperature = 0
+    outdoor_max_humid = 0
+    indoor_temperature = 0
+    indoor_humidity = 0
+    indoor_max_temp = 0
+    indoor_max_humid = 0
 
     # Pass Temperature logging out to a new thread, can keep webserver running at same time! #multitasking
-    temp_log_thread = threading.Thread(target=read_log_temperature, args=(5))
+    temp_log_thread = threading.Thread(target=read_log_temperature)
     display_thread = threading.Thread(target=lcd_display)
     temp_log_thread.start()
     display_thread.start()
+
+    # Webserver for advanced statistics
+    app.run(host="0.0.0.0")

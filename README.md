@@ -1,19 +1,13 @@
 # RaspberryPi_Temp_Logger
-Some code to log and predict temperatures.
+A clock with some extra functionality.
 
-## Usage
-yes
 ## GPIO Pinout
 This is still very much under development and has yet to be tested with an actual sensor!\
 My GPIO Configuration, see [GPIO Pin out](https://www.raspberrypi-spy.co.uk/2012/06/simple-guide-to-the-rpi-gpio-header-and-pins/):
 
 -   Sensor 1: GPIO Pin 16, D23, Outdoor
 -   Sensor 2: GPIO Pin 18, D24, Indoor
--   LCD Display: 
-
-## To Do
--   Test with actual sensor
--   Build Web Server
+-   LCD Display: GPIO Pins 03 05
 
 ## Setup
 There are two components to the software setup, Python libaries and some other ones (A StackOverflow post said to install them to fix an error I had):
@@ -27,4 +21,5 @@ sudo apt install libjasper-dev
 sudo apt install libqtgui4 
 sudo apt install libqt4-test
 sudo apt install libopenjp2-7
+pip3 install -r requirements.txt
 ```
