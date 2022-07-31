@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en-gb">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
+        <base href="{{ .Site.BaseURL }}">
+        <title>{{ block "title" .}}{{ .Title}} - JakeNTech{{end}}</title>
+        <link rel="shortcut icon" href="/assets/img/favicon.png"/>
+        {{/*  My CSS  */}}
+        {{ $style := resources.Get "sass/style.scss" | resources.ToCSS | resources.Minify }}
+        <link rel="stylesheet" href="{{ $style.Permalink }}">
+        {{/*  Google Font  */}}
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400&display=swap" rel="stylesheet">
+        {{/*  META STUFF https://developers.facebook.com/docs/sharing/webmasters/ */}}
+        <meta property="og:url" content="{{.Permalink}}" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="{{.Title}}" />
+        <meta property="og:description" content="{{.Description}}" />
+        <meta property="og:image" content="{{ .Site.BaseURL }}{{.Params.artwork}}" />
+        {{/*  https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/summary  */}}
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:site" content="@JakeNTech" />
+        <meta name="twitter:title" content="{{.Title}}" />
+        <meta name="twitter:description" content="{{.Description}}" />
+        <meta name="twitter:image" content="{{ .Site.BaseURL }}{{.Params.artwork}}" />
+        {{/*  https://developers.google.com/search/docs/advanced/crawling/special-tags  */}}
+        <meta name="description"content="{{.Description}}">
+    </head>
+    <body>
+        {{- partial "header.html" . -}}
+        <div id="content">
+            {{- block "main" . }}{{- end }}
+        </div>
+        {{- partial "footer.html" . -}}
+    </body>
+</html>

@@ -1,0 +1,288 @@
+// Light/Dark Mode
+$pink-color: #e5559b;
+$link-color: rgb(240, 45, 45);
+
+// Light Mode
+$light_background-color: #fff;
+$light_text-color: #000;
+$light_grey-color:#CECECE;
+
+
+// Dark Mode
+$dark_background-color: #292929;
+$dark_text-color: #fff;
+$dark_grey-color:#808080;
+
+
+// If Dark Mode
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: $dark_background-color;
+        color: $dark_text-color;
+    }
+	header{
+		ul{
+			li{
+				a{
+					color: $dark_text-color;
+				}
+			}
+		}
+	}
+	.blog_content{
+		figure{
+			figcaption{
+				background-color: $dark_grey-color;
+			}
+		}
+		table{
+			td, th {
+				border: 1px solid $dark_grey-color;
+			}
+			tr:nth-child(even) {
+				background-color: $dark_grey-color;
+			}
+		}
+	}
+}
+
+// If Light Mode
+@media (prefers-color-scheme: light) {
+    body {
+        background-color: $light_background-color;
+        color: $light_text-color;
+    }
+	header{
+		ul{
+			li{
+				a{
+					color: $light_text-color;
+				}
+			}
+		}
+	}
+	.blog_content{
+		figure{
+			figcaption{
+				background-color: $light_grey-color;
+			}
+		}
+		table{
+			td, th {
+				border: 1px solid $light_grey-color;
+			}
+			tr:nth-child(even) {
+				background-color: $light_grey-color;
+			}
+		}
+	}
+}
+
+
+// Generic Styles
+html{
+	font-size: 50%;
+}
+body{
+	font-family: 'Lato', sans-serif;
+	font-size: 2rem;
+	margin: 20px auto;
+	padding: 0 10px;
+	max-width: 800px;
+	word-wrap: break-word;
+}
+@media (max-width: 800px) {
+	body {
+	  margin: 10px 0;
+	}
+}
+h1{
+	color: $pink-color;
+	font-weight: normal;
+	font-size: 4rem;
+}
+h2{
+	color: $pink-color;
+	font-weight: normal;
+	font-size: 3rem;
+}
+h3{
+	color: $pink-color;
+	font-weight: normal;
+}
+h1 a, h2 a{
+	color: $pink-color;
+	text-decoration: none;
+}
+p a{
+	color: $link-color;
+}
+
+button{
+	background-color: $pink-color;
+	color: $dark_text-color;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 2rem;
+	border: none;
+	padding: 1.5rem;
+	margin: 1.5rem;
+	margin-left: 0rem;
+}
+
+// HTML area specific
+header{
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	margin-top: 2rem;
+	margin-bottom: 2rem;
+	#active_page{
+		color: $pink-color;	
+	}
+	h1{
+		font-weight: normal;
+		font-size: 3rem;
+		margin: 0;
+		padding: 0;
+	}
+	nav{
+		margin-left: auto;
+	}
+	ul{
+		list-style-type: none;
+		margin: 0%;
+		padding: 0%;
+		li{
+			display: inline-block;
+			font-size: 2rem;
+			padding:0 10px;
+			margin-right: 1rem;
+			&:last-child{
+				margin-right: 0;
+			}
+			a{
+			text-decoration: none;
+			// color: $text-color;
+			}
+		}
+	}
+}
+
+//Footer
+footer{
+	h4{
+		text-align: center;
+		font-weight: lighter;
+		font-size: 	12px;
+	}
+	a{
+		text-decoration: underline;
+		color: $link-color;
+	}
+}
+
+// Classes
+.center_box{
+	text-align: center;
+}
+.content{
+	.title{
+		margin-bottom: 1rem;
+	}
+}
+.social_links{
+	ul{
+		li{
+			padding-bottom: 1rem;
+			a{
+				color: $link-color;
+			}
+		}
+	}
+}
+.blog_header{
+	h4{
+		font-weight: normal;
+	}
+}
+.blog_content{
+	img{
+		max-width: 100%;
+	}
+	figure{
+		align-items: center;
+		text-align: center;
+		figcaption{
+			font-style: italic;
+			padding:1rem;
+		}
+	}
+	table{
+		//https://www.w3schools.com/html/tryit.asp?filename=tryhtml_table_intro
+		border-collapse: collapse;
+		width: 100%;
+		th{
+			color: $pink-color;
+			font-weight: bold;
+		}
+		td, th {
+			text-align: left;
+			padding: 8px;
+		}
+	}
+	li{
+		a{
+			color: $link-color;
+		}
+	}
+}
+.blog_footer{
+	text-align: center;
+	img{
+		// border:$text-color;
+		margin: 2rem;
+	}
+}
+.blog_select{
+	a{
+		color: $link-color
+	}
+	img{
+		max-height: 20rem;
+	}
+}
+.bit_under_menu{
+	p{
+		margin-top:0rem;
+	}
+	h1{
+		margin-bottom: 1rem;
+	}
+}
+
+// ID's
+#rainbow{
+	background:linear-gradient(90deg, Red, Orange, Yellow, Green, Blue, Indigo);
+	height:0.5rem;
+}
+
+#this_location,#post_info{
+	margin-top: 1rem;
+	margin-bottom: 1rem;
+	svg{
+		color: $pink-color;
+		margin-right:1rem;
+		margin-left:0.5rem
+	}
+}
+
+#POV{
+	width:auto;
+	height:15%;
+	max-height: 200px;
+	margin: 3rem 0;
+	margin-bottom: 0.5rem;
+	border-radius: 5%;
+}

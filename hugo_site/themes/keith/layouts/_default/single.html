@@ -1,0 +1,23 @@
+
+{{ define "main" }}
+<section id="main">
+  {{/*  <h1 id="title">{{ .Title }}</h1>  */}}
+  <div>
+    <div class="blog_header">
+      <h2>{{.Title}}</h2>
+      <p><i>{{ .Date.Format "January 2006" }}</i></p>
+      <p>{{.Description}}</p>
+      {{/*  https://icons.getbootstrap.com/  */}}
+    <div id="rainbow"></div>
+      <article class="blog_content">
+          {{ .Content }}
+      </article>
+    <h2>The End.</h2>
+  </div>
+</section>
+<aside id="meta">
+    <div class="blog_footer">
+      <img src="{{ .Site.BaseURL }}{{.Params.artwork}}">
+    </div>
+</aside>
+{{ end }}

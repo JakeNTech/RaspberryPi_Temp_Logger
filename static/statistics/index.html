@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en-gb">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
+        <base href="http://192.168.0.5:5000/">
+        <title>Statistics - JakeNTech</title>
+        <link rel="shortcut icon" href="/assets/img/favicon.png"/>
+        
+        
+        <link rel="stylesheet" href="http://192.168.0.5:5000/sass/style.min.css">
+        
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400&display=swap" rel="stylesheet">
+        
+        <meta property="og:url" content="http://192.168.0.5:5000/statistics/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Statistics" />
+        <meta property="og:description" content="An about section for an about page, Madness I tell you! Madness!" />
+        <meta property="og:image" content="http://192.168.0.5:5000/" />
+        
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:site" content="@JakeNTech" />
+        <meta name="twitter:title" content="Statistics" />
+        <meta name="twitter:description" content="An about section for an about page, Madness I tell you! Madness!" />
+        <meta name="twitter:image" content="http://192.168.0.5:5000/" />
+        
+        <meta name="description"content="An about section for an about page, Madness I tell you! Madness!">
+    </head>
+    <body><header>
+    <nav>
+        <ul>
+            
+            
+            <li><a href="http://192.168.0.5:5000/">Current Stats</a></li>
+            <li><a href="http://192.168.0.5:5000/statistics/" id="active_page">Statistics</a></li>
+            <li><a href="http://192.168.0.5:5000/graphs/">Graphs</a></li>
+            
+        </ul>
+    </nav>
+</header><div id="content">
+<main>
+    <article>
+        <div class="bit_under_menu">
+            <h1 class="title">Statistics</h1>
+            
+            <div id="rainbow"></div>
+        </div>
+        
+        <p> Complete the form below to see statistics about that time period!</p>
+<form action="/statistics">
+    <!-- Select Date -->
+    <label for="start_date">Start Date:</label><br>
+    <input type="date" id="start_date" name="start_date"></br>
+    <label for="end_date">End Date:</label><br>
+    <input type="date" id="end_date" name="end_date"></br>
+    <!-- Select Sensor -->
+    <p>Sensor</p>
+    <input type="radio" id="indoor" name="sensor" value="HTML">
+    <label for="sensor">Indoor</label><br>
+    <input type="radio" id="outdoor" name="sensor" value="HTML">
+    <label for="sensor">Outdoor</label><br>
+    <!-- Send -->
+    <input type="submit" value="Submit">
+</form>
+    </article>
+    <ul>
+    
+    
+    </ul>
+</main>
+
+        </div><footer> 
+    <h4>Powered by <a href="https://gohugo.io/">Hugo</a> using a slightly modified version of <a href="https://github.com/JakeNTech/jakentech.github.io/tree/main/themes/keith">Keith.</a></h4>
+</footer></body>
+</html>

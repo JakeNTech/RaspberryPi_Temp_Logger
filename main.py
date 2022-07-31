@@ -2,6 +2,8 @@
 import csv
 import threading
 import time
+
+from requests import request
 import adafruit_dht
 import board
 import numpy as np
@@ -10,7 +12,7 @@ import I2C_LCD_driver
 from flask import Flask
 from astral import LocationInfo
 from astral.sun import sun
-from graphs import snazzy_graphs
+from data_utils import snazzy_data
 
 # https://gist.github.com/elizabethn119/25be959d124f4b4c86f7160cf916f4d4
 
@@ -110,9 +112,13 @@ def load_index():
     return app.send_static_file('index.html')
 
 # Send Files to make index.html look nice and fancy
-@app.route('/assets/<file>')
-def send_asset(file):
-    asset_path = "assets/"+file
+@app.route('/assets/JS/<file>')
+def send_JS(file):
+    asset_path = "assets/JS/"+file
+    return app.send_static_file(asset_path)
+@app.route('/sass/<file>')
+def send_CSS(file):
+    asset_path = "sass/"+file
     return app.send_static_file(asset_path)
 # Send Graphs
 @app.route('/assets/temp_storage/<file>')
@@ -153,12 +159,19 @@ def api_call(action):
         }
     
     elif action == "temp_graph":
-        snazzy_graphs.temp_humid_line_graph()
+        snazzy_data.temp_humid_line_graph()
         json_response = {
             "temperature_graph":"/assets/temp_storage/temperature_LG.png",
             "humidity_graph":"/assets/temp_storage/humidity_LG.png",
         }
 
+    return json_response
+
+@app.route('/statistics',methods=['POST'])
+def calc_stats():
+    start_date = request.form["start_date"]
+    end_date = request.form["end_date"]
+    json_response = snazzy_data.get_stats(start_date,end_date)
     return json_response
 
 if __name__ == "__main__":
