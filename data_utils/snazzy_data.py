@@ -44,9 +44,15 @@ def temp_humid_line_graph():
 
 def get_stats(start_date,end_date):
     df = data_reader()
-    # https://stackoverflow.com/questions/29370057/select-dataframe-rows-between-two-dates
-    mask = (df["Date/Time"] > start_date) & (df["Date/Time"] <= end_date)
-    df = df.loc[mask]
+    # if dates have been selected:
+    #   filter DataFrame for those dates
+    # else:
+    #   use whole data frame
+    if start_date and end_date != "":
+        # https://stackoverflow.com/questions/29370057/select-dataframe-rows-between-two-dates
+        mask = (df["Date/Time"] > start_date) & (df["Date/Time"] <= end_date)
+        df = df.loc[mask]
+    
     # Average Statistics
     avg_indoor_temp = df["Temperature(Indoor)"].mean()
     avg_outdoor_temp = df["Temperature(Outdoor)"].mean()
@@ -82,6 +88,9 @@ def get_stats(start_date,end_date):
         }
     }
     return json
+
+def custom_line_graph(sensors,axis,start_date,end_date):
+    print("I am a cat")
 
 if __name__ == "__main__":
     temp_humid_line_graph()

@@ -176,7 +176,7 @@ def api_call(action):
 
     return json_response
 
-@app.route('/statistics',methods=['POST'])
+@app.route('/statistic_calc',methods=['POST'])
 def calc_stats():
     start_date = request.form["start_date"]
     end_date = request.form["end_date"]
