@@ -2,6 +2,7 @@
 import csv
 import threading
 import time
+import subprocess
 
 from requests import request
 import adafruit_dht
@@ -18,7 +19,7 @@ from data_utils import snazzy_data
 
 def create_csv(output_file):
     csv_file = open(output_file,"w")
-    csv_file.write("Date/Time,Temperature(Outdoor),Humidity(Outdoor)(%),Temperature(Indoor),Humidity(Indoor)(%)\n")
+    csv_file.write("Date/Time,Temperature(Outdoor),Humidity(Outdoor)(%),Temperature(Indoor),Humidity(Indoor)(%),RaspPi_Temp\n")
     csv_file.close()
 
 def log_to_csv(output_file,this_line):
@@ -81,8 +82,10 @@ def read_log_temperature():
             if indoor_humidity > indoor_max_humid and isinstance(outdoor_humidity, float):
                 indoor_max_humid = indoor_humidity
 
-        #"Date/Time,Temperature(outdoor),Temperature(indoor),Humidity(outdoor)(%),Humidity(indoor)(%),Average_Temp,Average_Humidity
-        log_to_csv("./Output.csv",[current_time,outdoor_temperature,outdoor_humidity,indoor_temperature,indoor_humidity])
+        raspPi_temp = int(subprocess.run(['cat','/sys/class/thermal/thermal_zone0/temp'],stdout=subprocess.PIPE).stdout.decode('ascii'))/1000
+
+        #"Date/Time,Temperature(outdoor),Temperature(indoor),Humidity(outdoor)(%),Humidity(indoor)(%),RaspPi_temp
+        log_to_csv("./Output.csv",[current_time,outdoor_temperature,outdoor_humidity,indoor_temperature,indoor_humidity,raspPi_temp])
 
         time.sleep(5)
 
@@ -110,6 +113,12 @@ app = Flask(__name__)
 @app.route('/')
 def load_index():
     return app.send_static_file('index.html')
+@app.route('/numbers/')
+def load_stats():
+    return app.send_static_file('numbers/index.html')
+@app.route('/graphs/')
+def load_graphs():
+    return app.send_static_file('graphs/index.html')    
 
 # Send Files to make index.html look nice and fancy
 @app.route('/assets/JS/<file>')

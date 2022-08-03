@@ -1,11 +1,11 @@
 ---
-title: "Statistics"
-menu: "statistics"
+title: "Numbers"
+menu: "numbsres"
 draft: false
 description: "An about section for an about page, Madness I tell you! Madness!"
 ---
 <p> Complete the form below to see statistics about that time period!</p>
-<form action="/statistics">
+<form action="/numbers">
     <!-- Select Date -->
     <label for="start_date">Start Date:</label><br>
     <input type="date" id="start_date" name="start_date"></br>

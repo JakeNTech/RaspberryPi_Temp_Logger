@@ -4,15 +4,15 @@
             {{/*  If the page is the homepage  */}}
             {{if (eq .Title "RasPi Temp Logger")}}
             <li><a href="{{ .Site.BaseURL}}" id="active_page">Current Stats</a></li>
-            <li><a href="{{ ref . "statistics"}}">Statistics</a></li>
+            <li><a href="{{ ref . "numbers"}}">Statistics</a></li>
             <li><a href="{{ ref . "graphs"}}">Graphs</a></li>
             {{else if (eq .Title "Statistics")}}
             <li><a href="{{ .Site.BaseURL}}">Current Stats</a></li>
-            <li><a href="{{ ref . "statistics"}}" id="active_page">Statistics</a></li>
+            <li><a href="{{ ref . "numbers"}}" id="active_page">Statistics</a></li>
             <li><a href="{{ ref . "graphs"}}">Graphs</a></li>
             {{else if (eq .Title "Graphs")}}
             <li><a href="{{ .Site.BaseURL}}">Current Stats</a></li>
-            <li><a href="{{ ref . "statistics"}}">Statistics</a></li>
+            <li><a href="{{ ref . "numbers"}}">Statistics</a></li>
             <li><a href="{{ ref . "graphs"}}" id="active_page">Graphs</a></li>
             {{end}}
         </ul>
