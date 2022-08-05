@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Statistics on Rasp clock</title>
+    <title>Numbers on Rasp clock</title>
     <link>http://192.168.0.5:5000/numbers/</link>
-    <description>Recent content in Statistics on Rasp clock</description>
+    <description>Recent content in Numbers on Rasp clock</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-gb</language><atom:link href="http://192.168.0.5:5000/numbers/index.xml" rel="self" type="application/rss+xml" />
   </channel>

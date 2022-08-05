@@ -7,11 +7,11 @@
   </url>
   
   <url>
-    <loc>http://192.168.0.5:5000/</loc>
+    <loc>http://192.168.0.5:5000/numbers/</loc>
   </url>
   
   <url>
-    <loc>http://192.168.0.5:5000/numbers/</loc>
+    <loc>http://192.168.0.5:5000/</loc>
   </url>
   
 </urlset>

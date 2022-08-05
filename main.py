@@ -3,23 +3,20 @@ import csv
 import threading
 import time
 import subprocess
-
-from requests import request
 import adafruit_dht
 import board
 import numpy as np
-# import os
+import os
 import I2C_LCD_driver
-from flask import Flask
-from astral import LocationInfo
-from astral.sun import sun
+from flask import Flask, request
 from data_utils import snazzy_data
+import psutil
 
 # https://gist.github.com/elizabethn119/25be959d124f4b4c86f7160cf916f4d4
 
 def create_csv(output_file):
     csv_file = open(output_file,"w")
-    csv_file.write("Date/Time,Temperature(Outdoor),Humidity(Outdoor)(%),Temperature(Indoor),Humidity(Indoor)(%),RaspPi_Temp\n")
+    csv_file.write("Date/Time,Temperature(Outdoor),Humidity(Outdoor)(%),Temperature(Indoor),Humidity(Indoor)(%),RaspPi_Temp,CPU_usage\n")
     csv_file.close()
 
 def log_to_csv(output_file,this_line):
@@ -44,21 +41,17 @@ def read_log_temperature():
         global outdoor_max_humid
         global indoor_max_temp
         global indoor_max_humid
+        global raspPi_temp
+        global raspPi_cpu
 
         # Read from sensor
         try:
             outdoor_humidity = outdoor_dhtSensor.humidity
             outdoor_temperature = outdoor_dhtSensor.temperature
-        except RuntimeError:
-            outdoor_humidity = None
-            outdoor_temperature = None
-        
-        try:
             indoor_humidity = indoor_dhtSensor2.humidity
             indoor_temperature = indoor_dhtSensor2.temperature
         except RuntimeError:
-            indoor_humidity = None
-            indoor_temperature = None
+            pass
 
         # if the day variable no longer is the current day
         if day != time.strftime("%a"):
@@ -82,10 +75,11 @@ def read_log_temperature():
             if indoor_humidity > indoor_max_humid and isinstance(outdoor_humidity, float):
                 indoor_max_humid = indoor_humidity
 
-        raspPi_temp = int(subprocess.run(['cat','/sys/class/thermal/thermal_zone0/temp'],stdout=subprocess.PIPE).stdout.decode('ascii'))/1000
+        raspPi_temp = round((int(subprocess.run(['cat','/sys/class/thermal/thermal_zone0/temp'],stdout=subprocess.PIPE).stdout.decode('ascii'))/1000),2)
+        raspPi_cpu = psutil.cpu_percent()
 
         #"Date/Time,Temperature(outdoor),Temperature(indoor),Humidity(outdoor)(%),Humidity(indoor)(%),RaspPi_temp
-        log_to_csv("./Output.csv",[current_time,outdoor_temperature,outdoor_humidity,indoor_temperature,indoor_humidity,raspPi_temp])
+        log_to_csv("./Output.csv",[current_time,outdoor_temperature,outdoor_humidity,indoor_temperature,indoor_humidity,raspPi_temp,raspPi_cpu])
 
         time.sleep(5)
 
@@ -94,16 +88,21 @@ def lcd_display():
     gpio_display = I2C_LCD_driver.lcd()
     gpio_display.lcd_clear()
 
+    # Sensors take a hot moment before a reading
+    gpio_display.lcd_display_string(f"{time.strftime('%H:%M  %a %d/%m')}",line=1)
+    gpio_display.lcd_display_string("192.168.0.5:5000",line=2)
+    time.sleep(5)
+
     while True:
         gpio_display.lcd_display_string(f"{time.strftime('%H:%M  %a %d/%m')}",line=1)
-
         if outdoor_temperature == None or outdoor_humidity == None or indoor_temperature == None or indoor_humidity == None:
             gpio_display.lcd_display_string("Runtime Error :( ",line=2)
         else:            
             gpio_display.lcd_display_string("In:  "+str(indoor_temperature)+"C "+str(indoor_humidity)+"%",line=2)
             time.sleep(5)
             gpio_display.lcd_display_string("Out: "+str(outdoor_temperature)+"C "+str(outdoor_humidity)+"%",line=2)
-        
+            time.sleep(5)
+            gpio_display.lcd_display_string("Pi: "+str(round(raspPi_temp,2))+"C "+str(raspPi_cpu)+"%",line=2)
         time.sleep(5)
 
 # Web Interface for better statistics
@@ -121,9 +120,9 @@ def load_graphs():
     return app.send_static_file('graphs/index.html')    
 
 # Send Files to make index.html look nice and fancy
-@app.route('/assets/JS/<file>')
-def send_JS(file):
-    asset_path = "assets/JS/"+file
+@app.route('/assets/<file>')
+def send_asset(file):
+    asset_path = "assets/"+file
     return app.send_static_file(asset_path)
 @app.route('/sass/<file>')
 def send_CSS(file):
@@ -151,43 +150,32 @@ def api_call(action):
                 "humidity":outdoor_humidity,
                 "max_temp":outdoor_max_temp,
                 "max_humidity":outdoor_max_humid
+            },
+            "pi":{
+                "cpu_usage":raspPi_cpu,
+                "cpu_temp":raspPi_temp
             }
         }
-
-    elif action == "dawn_dusk":
-        #collect dawn/dusk times
-        city = LocationInfo("London", "England", "Europe/London", 51.5, -0.116)
-        s = sun(city.observer)
-        dawn = str(s["dawn"])
-        dawn = ":".join(dawn.split(" ")[1].split(".")[0].split(":")[0:2])
-        dusk = str(s["dusk"])
-        dusk = ":".join(dusk.split(" ")[1].split(".")[0].split(":")[0:2])
-        json_response ={
-            "dawn":dawn,
-            "dusk":dusk
-        }
     
-    elif action == "temp_graph":
+    elif action == "graph_maker":
         snazzy_data.temp_humid_line_graph()
         json_response = {
             "temperature_graph":"/assets/temp_storage/temperature_LG.png",
             "humidity_graph":"/assets/temp_storage/humidity_LG.png",
+            "CPUtemp_graph":"/assets/temp_storage/CPUtemp_LG.png",
+            "CPUusage_graph":"/assets/temp_storage/CPUusage_LG.png",
         }
 
-    return json_response
+    elif action == "get_stats":
+        json_response = snazzy_data.get_stats(request.args.get('start_date'),request.args.get('end_date'))
 
-@app.route('/statistic_calc',methods=['POST'])
-def calc_stats():
-    start_date = request.form["start_date"]
-    end_date = request.form["end_date"]
-    json_response = snazzy_data.get_stats(start_date,end_date)
     return json_response
 
 if __name__ == "__main__":
     print("Raspberry Pi Temperature & Humidity Logger!")
     
-    # if os.path.exists("Output.csv"):
-    #     os.rename("./Output.csv",f"../Sample_Data/{datetime.now().strftime('%Y-%m-%dT%H%M:%S')}_Old.csv")
+    if os.path.exists("Output.csv"):
+        os.rename("./Output.csv",f"./{time.strftime('%Y-%m-%dT%H%M:%S')}_Old.csv")
 
     create_csv("./Output.csv")
 
@@ -199,6 +187,8 @@ if __name__ == "__main__":
     indoor_humidity = 0
     indoor_max_temp = 0
     indoor_max_humid = 0
+    raspPi_temp = 0
+    raspPi_cpu = 0
 
     # Pass Temperature logging out to a new thread, can keep webserver running at same time! #multitasking
     temp_log_thread = threading.Thread(target=read_log_temperature)

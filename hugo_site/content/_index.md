@@ -9,4 +9,4 @@ description: "You guessed it, its the site of JakeNTech. Shocking right?"
     <div id="rainbow"></div>
     <div id="statistics"></div>
 </div>
-<script src="/assets/JS/script.js" onload="current_temp()"></script>
+<script src="/assets/script.js" onload="current_temp()"></script>

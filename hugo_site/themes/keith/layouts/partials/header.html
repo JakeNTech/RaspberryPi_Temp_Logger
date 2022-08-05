@@ -6,7 +6,7 @@
             <li><a href="{{ .Site.BaseURL}}" id="active_page">Current Stats</a></li>
             <li><a href="{{ ref . "numbers"}}">Statistics</a></li>
             <li><a href="{{ ref . "graphs"}}">Graphs</a></li>
-            {{else if (eq .Title "Statistics")}}
+            {{else if (eq .Title "Numbers")}}
             <li><a href="{{ .Site.BaseURL}}">Current Stats</a></li>
             <li><a href="{{ ref . "numbers"}}" id="active_page">Statistics</a></li>
             <li><a href="{{ ref . "graphs"}}">Graphs</a></li>

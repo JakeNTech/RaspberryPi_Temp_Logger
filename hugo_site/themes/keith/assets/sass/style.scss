@@ -130,6 +130,9 @@ button{
 	margin: 1.5rem;
 	margin-left: 0rem;
 }
+img{
+	width:100%;
+}
 
 // HTML area specific
 header{
@@ -207,37 +210,7 @@ footer{
 		font-weight: normal;
 	}
 }
-.blog_content{
-	img{
-		max-width: 100%;
-	}
-	figure{
-		align-items: center;
-		text-align: center;
-		figcaption{
-			font-style: italic;
-			padding:1rem;
-		}
-	}
-	table{
-		//https://www.w3schools.com/html/tryit.asp?filename=tryhtml_table_intro
-		border-collapse: collapse;
-		width: 100%;
-		th{
-			color: $pink-color;
-			font-weight: bold;
-		}
-		td, th {
-			text-align: left;
-			padding: 8px;
-		}
-	}
-	li{
-		a{
-			color: $link-color;
-		}
-	}
-}
+
 .blog_footer{
 	text-align: center;
 	img{
@@ -285,4 +258,36 @@ footer{
 	margin: 3rem 0;
 	margin-bottom: 0.5rem;
 	border-radius: 5%;
+}
+
+#content{
+	img{
+		max-width: 100%;
+	}
+	figure{
+		align-items: center;
+		text-align: center;
+		figcaption{
+			font-style: italic;
+			padding:1rem;
+		}
+	}
+	table{
+		//https://www.w3schools.com/html/tryit.asp?filename=tryhtml_table_intro
+		border-collapse: collapse;
+		width: 100%;
+		th{
+			color: $pink-color;
+			font-weight: bold;
+		}
+		td, th {
+			text-align: left;
+			padding: 8px;
+		}
+	}
+	li{
+		a{
+			color: $link-color;
+		}
+	}
 }
