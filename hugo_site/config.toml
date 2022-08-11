@@ -1,4 +1,4 @@
-baseURL = "http://192.168.0.5:5000/"
+baseURL = "http://192.168.0.58:5000/"
 languageCode = "en-gb"
 title = "Rasp clock"
 theme = "keith"

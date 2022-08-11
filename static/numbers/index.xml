@@ -2,9 +2,9 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Numbers on Rasp clock</title>
-    <link>http://192.168.0.5:5000/numbers/</link>
+    <link>http://192.168.0.58:5000/numbers/</link>
     <description>Recent content in Numbers on Rasp clock</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-gb</language><atom:link href="http://192.168.0.5:5000/numbers/index.xml" rel="self" type="application/rss+xml" />
+    <language>en-gb</language><atom:link href="http://192.168.0.58:5000/numbers/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>

@@ -44,14 +44,21 @@ def read_log_temperature():
         global raspPi_temp
         global raspPi_cpu
 
-        # Read from sensor
+        # read from outdoor sensor
         try:
             outdoor_humidity = outdoor_dhtSensor.humidity
             outdoor_temperature = outdoor_dhtSensor.temperature
+        except RuntimeError:
+            outdoor_humidity = None
+            outdoor_temperature = None
+        
+        # read from indoor sensor
+        try:
             indoor_humidity = indoor_dhtSensor2.humidity
             indoor_temperature = indoor_dhtSensor2.temperature
         except RuntimeError:
-            pass
+            indoor_humidity = None
+            indoor_temperature = None
 
         # if the day variable no longer is the current day
         if day != time.strftime("%a"):
@@ -78,8 +85,8 @@ def read_log_temperature():
         raspPi_temp = round((int(subprocess.run(['cat','/sys/class/thermal/thermal_zone0/temp'],stdout=subprocess.PIPE).stdout.decode('ascii'))/1000),2)
         raspPi_cpu = psutil.cpu_percent()
 
-        #"Date/Time,Temperature(outdoor),Temperature(indoor),Humidity(outdoor)(%),Humidity(indoor)(%),RaspPi_temp
-        log_to_csv("./Output.csv",[current_time,outdoor_temperature,outdoor_humidity,indoor_temperature,indoor_humidity,raspPi_temp,raspPi_cpu])
+        if outdoor_temperature != None and indoor_temperature != None:
+            log_to_csv("./Output.csv",[current_time,outdoor_temperature,outdoor_humidity,indoor_temperature,indoor_humidity,raspPi_temp,raspPi_cpu])
 
         time.sleep(5)
 
@@ -94,15 +101,24 @@ def lcd_display():
     time.sleep(5)
 
     while True:
+        # date time
         gpio_display.lcd_display_string(f"{time.strftime('%H:%M  %a %d/%m')}",line=1)
-        if outdoor_temperature == None or outdoor_humidity == None or indoor_temperature == None or indoor_humidity == None:
-            gpio_display.lcd_display_string("Runtime Error :( ",line=2)
+        # indoor temp
+        if indoor_temperature == None or indoor_humidity == None:
+            gpio_display.lcd_display_string("In: Runtime Error",line=2)
         else:            
             gpio_display.lcd_display_string("In:  "+str(indoor_temperature)+"C "+str(indoor_humidity)+"%",line=2)
-            time.sleep(5)
+        
+        time.sleep(5)
+
+        # outdoor temp
+        if outdoor_temperature == None or outdoor_humidity == None:
+            gpio_display.lcd_display_string("Out: Runtime Error",line=2)
+        else:
             gpio_display.lcd_display_string("Out: "+str(outdoor_temperature)+"C "+str(outdoor_humidity)+"%",line=2)
-            time.sleep(5)
-            gpio_display.lcd_display_string("Pi: "+str(round(raspPi_temp,2))+"C "+str(raspPi_cpu)+"%",line=2)
+        
+        time.sleep(5)
+        gpio_display.lcd_display_string("Pi: "+str(round(raspPi_temp,2))+"C "+str(raspPi_cpu)+"%",line=2)
         time.sleep(5)
 
 # Web Interface for better statistics
@@ -174,8 +190,8 @@ def api_call(action):
 if __name__ == "__main__":
     print("Raspberry Pi Temperature & Humidity Logger!")
     
-    if os.path.exists("Output.csv"):
-        os.rename("./Output.csv",f"./{time.strftime('%Y-%m-%dT%H%M:%S')}_Old.csv")
+    # if os.path.exists("Output.csv"):
+    #     os.rename("./Output.csv",f"./{time.strftime('%Y-%m-%dT%H%M:%S')}_Old.csv")
 
     create_csv("./Output.csv")
 
@@ -197,4 +213,4 @@ if __name__ == "__main__":
     display_thread.start()
 
     # Webserver for advanced statistics
-    app.run(host="0.0.0.0")
+    app.run(host="0.0.0.0", threaded=True)

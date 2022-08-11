@@ -1,5 +1,5 @@
 __pycache__
 .ipynb_checkpoints
-Output.csv
-/*_Old.csv
+*.csv
 /hugo_site/resources
+static/assets/temp_storage

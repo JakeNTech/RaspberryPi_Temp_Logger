@@ -4,7 +4,7 @@ function current_temp(){
         return response.text()
     }).then(function (text) {
         text = JSON.parse(text)
-        document.getElementById("statistics").innerHTML = `<h2>Indoor</h2><p>Current Temperature: ${text["indoor"]["temp"]}C</p><p>Current Humidity: ${text["indoor"]["humidity"]}%</p><p>Maximum Temperature: ${text["indoor"]["max_temp"]}C</p><p>Maximum Humidity: ${text["indoor"]["max_humidity"]}%</p><h2>Outdoor</h2><p>Current Temperature: ${text["outdoor"]["temp"]}C</p><p>Current Humidity: ${text["outdoor"]["humidity"]}%</p><p>Maximum Temperature: ${text["outdoor"]["max_temp"]}C</p><p>Maximum Humidity: ${text["outdoor"]["max_humidity"]}%</p>`
+        document.getElementById("statistics").innerHTML = `<h2>Indoor</h2><p>Current Temperature: ${text["indoor"]["temp"]}C</p><p>Current Humidity: ${text["indoor"]["humidity"]}%</p><p>Maximum Temperature: ${text["indoor"]["max_temp"]}C</p><p>Maximum Humidity: ${text["indoor"]["max_humidity"]}%</p><h2>Outdoor</h2><p>Current Temperature: ${text["outdoor"]["temp"]}C</p><p>Current Humidity: ${text["outdoor"]["humidity"]}%</p><p>Maximum Temperature: ${text["outdoor"]["max_temp"]}C</p><p>Maximum Humidity: ${text["outdoor"]["max_humidity"]}%</p><h2>Pi</h2><p>Current Temperature: ${text["pi"]["cpu_temp"]}C</p><p>Current Utilistaion: ${text["pi"]["cpu_usage"]}%</p>`
     })
 };
 
